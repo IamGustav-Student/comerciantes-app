@@ -26,6 +26,13 @@
       "expo-router",
       "expo-splash-screen",
       "expo-status-bar"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "57c9a7a5-c919-4fe9-be1e-e3c3ff89160f"
+      }
+    },
+    "owner": "programadorgs"
   }
 }
