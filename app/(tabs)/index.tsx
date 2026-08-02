@@ -6,6 +6,7 @@ export default function ComerciantesScreen() {
       soloAgro={false}
       colorAcento="#e11d48"
       textoVacio="Todavía no hay comercios cargados. ¡Volvé pronto!"
+      mostrarSeccionesCuradas
     />
   );
 }

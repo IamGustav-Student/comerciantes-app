@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -6,19 +6,22 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
-  Image,
   RefreshControl,
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { fetchComercios, fetchCategorias, Comercio, Categoria } from '../lib/api';
 import { colors, fonts, spacing, radius, shadow } from '../constants/theme';
+import TarjetaComercio, { TarjetaEsqueleto } from './TarjetaComercio';
+import SeccionCarrusel from './SeccionCarrusel';
 
 type Props = {
   soloAgro: boolean;
   colorAcento: string;
   textoVacio: string;
+  // Home "Comerciantes" muestra secciones curadas (como comerciantes.com.ar) cuando
+  // no hay búsqueda ni categoría activa. Agro se queda con la grilla simple.
+  mostrarSeccionesCuradas?: boolean;
 };
 
 const EMOJI_CATEGORIA: Record<string, string> = {
@@ -31,21 +34,7 @@ const EMOJI_CATEGORIA: Record<string, string> = {
   otros: '📦',
 };
 
-function TarjetaEsqueleto() {
-  return (
-    <View style={[styles.tarjeta, styles.tarjetaColumna]}>
-      <View style={[styles.foto, styles.esqueletoBloque]} />
-      <View style={styles.info}>
-        <View style={[styles.esqueletoLinea, { width: '50%' }]} />
-        <View style={[styles.esqueletoLinea, { width: '85%', marginTop: 8 }]} />
-        <View style={[styles.esqueletoLinea, { width: '70%', marginTop: 8 }]} />
-      </View>
-    </View>
-  );
-}
-
-export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Props) {
-  const router = useRouter();
+export default function ComercioList({ soloAgro, colorAcento, textoVacio, mostrarSeccionesCuradas }: Props) {
   const [comercios, setComercios] = useState<Comercio[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [busqueda, setBusqueda] = useState('');
@@ -91,11 +80,32 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
     debounceRef.current = setTimeout(() => cargar(texto, categoriaActiva), 350);
   };
 
-  const onSeleccionarCategoria = async (slug: string) => {
+  const onSeleccionarCategoria = async (slug: string | null) => {
     const nueva = categoriaActiva === slug ? null : slug;
     setCategoriaActiva(nueva);
     await cargar(busqueda, nueva);
   };
+
+  // Home: sin búsqueda ni categoría activa -> secciones curadas, iguales a las
+  // de comerciantes.com.ar, con las mismas tarjetas estilo MercadoLibre.
+  const modoInicio = mostrarSeccionesCuradas && !busqueda.trim() && !categoriaActiva;
+
+  const secciones = useMemo(() => {
+    if (!modoInicio) return null;
+    const destacados = comercios
+      .filter((c) => c.plan && c.plan !== 'gratuito')
+      .sort((a, b) => (b.id || 0) - (a.id || 0))
+      .slice(0, 10);
+    const recientes = [...comercios].sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 10);
+    const porCategoria = (slug: string) => comercios.filter((c) => c.categoria_slug === slug);
+    return {
+      destacados,
+      recientes,
+      gastronomia: porCategoria('gastronomia'),
+      indumentaria: porCategoria('indumentaria'),
+      servicios: porCategoria('servicios'),
+    };
+  }, [modoInicio, comercios]);
 
   const encabezado = (
     <>
@@ -158,14 +168,59 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
       <View style={styles.contenedor}>
         {encabezado}
         <View style={styles.filaGrilla}>
-          <TarjetaEsqueleto />
-          <TarjetaEsqueleto />
+          <TarjetaEsqueleto estiloContenedor={styles.tarjetaColumna} />
+          <TarjetaEsqueleto estiloContenedor={styles.tarjetaColumna} />
         </View>
         <View style={styles.filaGrilla}>
-          <TarjetaEsqueleto />
-          <TarjetaEsqueleto />
+          <TarjetaEsqueleto estiloContenedor={styles.tarjetaColumna} />
+          <TarjetaEsqueleto estiloContenedor={styles.tarjetaColumna} />
         </View>
       </View>
+    );
+  }
+
+  if (modoInicio && secciones) {
+    return (
+      <ScrollView
+        style={styles.contenedor}
+        refreshControl={<RefreshControl refreshing={refrescando} onRefresh={onRefresh} colors={[colorAcento]} />}
+      >
+        {encabezado}
+        <SeccionCarrusel
+          titulo="Los Favoritos de la Ciudad"
+          subtitulo="Los comercios destacados de la guía"
+          comercios={secciones.destacados}
+          colorAcento={colorAcento}
+        />
+        <SeccionCarrusel
+          titulo="¿Sale comidita?"
+          subtitulo="Gastronomía en Colón"
+          comercios={secciones.gastronomia}
+          colorAcento={colorAcento}
+          onVerTodos={() => onSeleccionarCategoria('gastronomia')}
+        />
+        <SeccionCarrusel
+          titulo="Recién sumados a la guía"
+          comercios={secciones.recientes}
+          colorAcento={colorAcento}
+        />
+        <SeccionCarrusel
+          titulo="Brillá más que nunca"
+          subtitulo="Indumentaria y calzado"
+          comercios={secciones.indumentaria}
+          colorAcento={colorAcento}
+          onVerTodos={() => onSeleccionarCategoria('indumentaria')}
+        />
+        <SeccionCarrusel
+          titulo="Soluciones Mágicas"
+          subtitulo="Servicios que te salvan las papas"
+          comercios={secciones.servicios}
+          colorAcento={colorAcento}
+          onVerTodos={() => onSeleccionarCategoria('servicios')}
+        />
+        {comercios.length === 0 ? <Text style={styles.vacio}>{textoVacio}</Text> : null}
+        <View style={{ height: spacing.xl }} />
+      </ScrollView>
     );
   }
 
@@ -182,51 +237,9 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
           <RefreshControl refreshing={refrescando} onRefresh={onRefresh} colors={[colorAcento]} />
         }
         ListEmptyComponent={<Text style={styles.vacio}>{textoVacio}</Text>}
-        renderItem={({ item }) => {
-          const destacado = item.plan && item.plan !== 'gratuito';
-          return (
-            <Pressable
-              style={({ pressed }) => [styles.tarjeta, styles.tarjetaColumna, pressed && styles.presionado]}
-              onPress={() => router.push(`/comercio/${item.id}`)}
-            >
-              <View style={styles.fotoContenedor}>
-                {item.foto_portada ? (
-                  <Image source={{ uri: item.foto_portada }} style={styles.foto} />
-                ) : (
-                  <View style={[styles.foto, styles.fotoVacia]}>
-                    <Ionicons name="storefront-outline" size={26} color="#c7c7c7" />
-                  </View>
-                )}
-                {destacado ? (
-                  <View style={[styles.cintaDestacado, { backgroundColor: colorAcento }]}>
-                    <Text style={styles.cintaTexto}>Destacado</Text>
-                  </View>
-                ) : null}
-              </View>
-              <View style={styles.info}>
-                <Text style={[styles.categoria, { color: colorAcento }]} numberOfLines={1}>
-                  {item.categoria_nombre || 'Sin categoría'}
-                </Text>
-                <Text style={styles.nombre} numberOfLines={2}>
-                  {item.nombre_negocio}
-                </Text>
-                {item.descripcion ? (
-                  <Text style={styles.descripcion} numberOfLines={2}>
-                    {item.descripcion}
-                  </Text>
-                ) : null}
-                {item.localidad_nombre ? (
-                  <View style={styles.ubicacionFila}>
-                    <Ionicons name="location-outline" size={11} color={colors.textFaint} />
-                    <Text style={styles.ubicacionTexto} numberOfLines={1}>
-                      {item.localidad_nombre}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-            </Pressable>
-          );
-        }}
+        renderItem={({ item }) => (
+          <TarjetaComercio comercio={item} colorAcento={colorAcento} estiloContenedor={styles.tarjetaColumna} />
+        )}
       />
     </View>
   );
@@ -268,32 +281,5 @@ const styles = StyleSheet.create({
   vacio: { fontFamily: fonts.regular, textAlign: 'center', color: colors.textFaint, marginTop: 40, paddingHorizontal: 24 },
   contenidoGrilla: { paddingHorizontal: 10, paddingBottom: 20 },
   filaGrilla: { gap: 10, paddingHorizontal: 4 },
-  tarjeta: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    overflow: 'hidden',
-    ...shadow.card,
-  },
   tarjetaColumna: { flex: 1, marginBottom: spacing.md },
-  fotoContenedor: { position: 'relative' },
-  foto: { width: '100%', height: 110 },
-  fotoVacia: { backgroundColor: '#f0f0f0', alignItems: 'center', justifyContent: 'center' },
-  cintaDestacado: {
-    position: 'absolute',
-    top: 8,
-    left: -28,
-    width: 110,
-    paddingVertical: 2,
-    transform: [{ rotate: '-45deg' }],
-    alignItems: 'center',
-  },
-  cintaTexto: { color: '#fff', fontFamily: fonts.bold, fontSize: 9, letterSpacing: 0.3 },
-  info: { padding: 10 },
-  nombre: { fontFamily: fonts.semiBold, fontSize: 13.5, color: colors.textStrong, marginTop: 2, lineHeight: 17 },
-  categoria: { fontFamily: fonts.bold, fontSize: 10.5, textTransform: 'uppercase' },
-  descripcion: { fontFamily: fonts.regular, fontSize: 12, color: colors.textMuted, marginTop: 4, lineHeight: 15 },
-  ubicacionFila: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 6 },
-  ubicacionTexto: { fontFamily: fonts.regular, fontSize: 10.5, color: colors.textFaint },
-  esqueletoBloque: { backgroundColor: colors.skeleton },
-  esqueletoLinea: { height: 9, borderRadius: 5, backgroundColor: colors.skeleton },
 });
