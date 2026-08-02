@@ -10,10 +10,34 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { fetchComercios, fetchCategorias, Comercio, Categoria } from '../lib/api';
 import { colors, fonts, spacing, radius, shadow } from '../constants/theme';
 import TarjetaComercio, { TarjetaEsqueleto } from './TarjetaComercio';
 import SeccionCarrusel from './SeccionCarrusel';
+import SeccionInfoEstatica, { ItemInfo } from './SeccionInfoEstatica';
+
+// Kit de emergencia y logística local: contenido real (no viene de la API de
+// comercios, es información fija de la ciudad), igual que en comerciantes.com.ar.
+// Los que no tienen número real confirmado (agua, municipio) muestran una nota
+// en vez de inventar un teléfono.
+const KIT_EMERGENCIA: ItemInfo[] = [
+  { icono: 'medkit', etiqueta: 'Hospital / Urgencias', numero: '107' },
+  { icono: 'shield-checkmark', etiqueta: 'Policía / Seguridad', numero: '911' },
+  { icono: 'flame', etiqueta: 'Bomberos Voluntarios', numero: '100' },
+  { icono: 'flash', etiqueta: 'Guardia de Luz (CELW)', numero: '03462 461014' },
+  { icono: 'warning', etiqueta: 'Emergencias Gas', numero: '0800 888 1137' },
+  { icono: 'water', etiqueta: 'Agua Potable', nota: 'Reclamos Red' },
+  { icono: 'business', etiqueta: 'Administración Municipal', nota: 'Atención al Vecino' },
+  { icono: 'heart', etiqueta: 'Asistencia Género', numero: '144' },
+];
+
+const LOGISTICA_LOCAL: ItemInfo[] = [
+  { icono: 'car', etiqueta: 'Remis Central', numero: '03462 15-123456' },
+  { icono: 'car-sport', etiqueta: 'Remis El Rápido', numero: '03462 15-654321' },
+  { icono: 'bus', etiqueta: 'A Rosario (Mar. y Jue.)', numero: '0341 15-123456' },
+  { icono: 'bus', etiqueta: 'A Venado (Lun. a Vie.)', numero: '03462 15-789012' },
+];
 
 type Props = {
   soloAgro: boolean;
@@ -35,6 +59,7 @@ const EMOJI_CATEGORIA: Record<string, string> = {
 };
 
 export default function ComercioList({ soloAgro, colorAcento, textoVacio, mostrarSeccionesCuradas }: Props) {
+  const router = useRouter();
   const [comercios, setComercios] = useState<Comercio[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [busqueda, setBusqueda] = useState('');
@@ -218,6 +243,32 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio, mostra
           colorAcento={colorAcento}
           onVerTodos={() => onSeleccionarCategoria('servicios')}
         />
+
+        <Pressable
+          style={({ pressed }) => [styles.bannerSumar, pressed && styles.presionado, { backgroundColor: colorAcento }]}
+          onPress={() => router.push('/suscribirse')}
+        >
+          <Ionicons name="megaphone" size={22} color="#fff" />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.bannerSumarTitulo}>¿Tenés un comercio en Colón?</Text>
+            <Text style={styles.bannerSumarTexto}>Sumate a la guía y recibí pedidos por WhatsApp.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#fff" />
+        </Pressable>
+
+        <SeccionInfoEstatica
+          titulo="Kit de Emergencia"
+          subtitulo="Guardá esta sección, por las dudas"
+          items={KIT_EMERGENCIA}
+          colorAcento={colorAcento}
+        />
+        <SeccionInfoEstatica
+          titulo="¡Te llevamos!"
+          subtitulo="Remises, fletes y comisionistas"
+          items={LOGISTICA_LOCAL}
+          colorAcento={colorAcento}
+        />
+
         {comercios.length === 0 ? <Text style={styles.vacio}>{textoVacio}</Text> : null}
         <View style={{ height: spacing.xl }} />
       </ScrollView>
@@ -282,4 +333,15 @@ const styles = StyleSheet.create({
   contenidoGrilla: { paddingHorizontal: 10, paddingBottom: 20 },
   filaGrilla: { gap: 10, paddingHorizontal: 4 },
   tarjetaColumna: { flex: 1, marginBottom: spacing.md },
+  bannerSumar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm + 2,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.xl,
+    padding: spacing.md + 2,
+    borderRadius: radius.md,
+  },
+  bannerSumarTitulo: { fontFamily: fonts.bold, fontSize: 13.5, color: '#fff' },
+  bannerSumarTexto: { fontFamily: fonts.regular, fontSize: 11.5, color: 'rgba(255,255,255,0.9)', marginTop: 2 },
 });
