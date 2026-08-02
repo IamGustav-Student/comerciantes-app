@@ -18,6 +18,7 @@ import {
   Plan,
   Categoria,
 } from '../lib/api';
+import { colors, fonts, spacing, radius, shadow } from '../constants/theme';
 
 export default function SuscribirseScreen() {
   const router = useRouter();
@@ -92,7 +93,7 @@ export default function SuscribirseScreen() {
   if (cargando) {
     return (
       <View style={styles.centro}>
-        <ActivityIndicator size="large" color="#e11d48" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -110,7 +111,10 @@ export default function SuscribirseScreen() {
             ? 'Te abrimos Mercado Pago para completar el pago. En cuanto se acredite, tu comercio queda activo en la guía.'
             : 'Tu comercio quedó cargado. Nuestro equipo lo revisa y lo activa en las próximas 48hs.'}
         </Text>
-        <Pressable style={styles.botonVolver} onPress={() => router.back()}>
+        <Pressable
+          style={({ pressed }) => [styles.botonVolver, pressed && styles.presionado]}
+          onPress={() => router.back()}
+        >
           <Text style={styles.botonVolverTexto}>Volver a la guía</Text>
         </Pressable>
       </View>
@@ -162,29 +166,34 @@ export default function SuscribirseScreen() {
       </ScrollView>
 
       <Text style={styles.seccionTitulo}>Datos del negocio</Text>
-      <TextInput style={styles.input} placeholder="Nombre del negocio *" value={businessName} onChangeText={setBusinessName} />
-      <TextInput style={styles.input} placeholder="Teléfono *" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-      <TextInput style={styles.input} placeholder="Dirección *" value={address} onChangeText={setAddress} />
+      <TextInput style={styles.input} placeholder="Nombre del negocio *" placeholderTextColor={colors.textFaint} value={businessName} onChangeText={setBusinessName} />
+      <TextInput style={styles.input} placeholder="Teléfono *" placeholderTextColor={colors.textFaint} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+      <TextInput style={styles.input} placeholder="Dirección *" placeholderTextColor={colors.textFaint} value={address} onChangeText={setAddress} />
       <TextInput
         style={[styles.input, styles.inputMultilinea]}
         placeholder="Descripción breve de tu negocio"
+        placeholderTextColor={colors.textFaint}
         value={description}
         onChangeText={setDescription}
         multiline
         numberOfLines={3}
       />
-      <TextInput style={styles.input} placeholder="WhatsApp (opcional)" value={whatsapp} onChangeText={setWhatsapp} keyboardType="phone-pad" />
-      <TextInput style={styles.input} placeholder="Instagram (opcional)" value={instagram} onChangeText={setInstagram} autoCapitalize="none" />
+      <TextInput style={styles.input} placeholder="WhatsApp (opcional)" placeholderTextColor={colors.textFaint} value={whatsapp} onChangeText={setWhatsapp} keyboardType="phone-pad" />
+      <TextInput style={styles.input} placeholder="Instagram (opcional)" placeholderTextColor={colors.textFaint} value={instagram} onChangeText={setInstagram} autoCapitalize="none" />
 
       <Text style={styles.seccionTitulo}>Tus datos (titular)</Text>
-      <TextInput style={styles.input} placeholder="Tu nombre completo *" value={ownerName} onChangeText={setOwnerName} />
-      <TextInput style={styles.input} placeholder="Tu email *" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
-      <TextInput style={styles.input} placeholder="Tu DNI *" value={dni} onChangeText={setDni} keyboardType="number-pad" />
+      <TextInput style={styles.input} placeholder="Tu nombre completo *" placeholderTextColor={colors.textFaint} value={ownerName} onChangeText={setOwnerName} />
+      <TextInput style={styles.input} placeholder="Tu email *" placeholderTextColor={colors.textFaint} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
+      <TextInput style={styles.input} placeholder="Tu DNI *" placeholderTextColor={colors.textFaint} value={dni} onChangeText={setDni} keyboardType="number-pad" />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <Pressable
-        style={[styles.botonEnviar, !formularioValido && styles.botonDeshabilitado]}
+        style={({ pressed }) => [
+          styles.botonEnviar,
+          !formularioValido && styles.botonDeshabilitado,
+          pressed && formularioValido && styles.presionado,
+        ]}
         disabled={!formularioValido || enviando}
         onPress={onEnviar}
       >
@@ -199,61 +208,65 @@ export default function SuscribirseScreen() {
 }
 
 const styles = StyleSheet.create({
-  raiz: { flex: 1, backgroundColor: '#f4f7f6' },
-  contenido: { padding: 20, paddingBottom: 60 },
-  centro: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, backgroundColor: '#fff' },
-  seccionTitulo: { fontWeight: '700', fontSize: 15, color: '#1e272e', marginTop: 18, marginBottom: 10 },
+  raiz: { flex: 1, backgroundColor: colors.background },
+  contenido: { padding: spacing.xl, paddingBottom: 60 },
+  presionado: { opacity: 0.8 },
+  centro: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, backgroundColor: colors.surface },
+  seccionTitulo: { fontFamily: fonts.semiBold, fontSize: 15, color: colors.textStrong, marginTop: spacing.xl - 2, marginBottom: spacing.md - 2 },
   planes: { flexDirection: 'row', gap: 10 },
   planCard: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 14,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
     borderWidth: 1.5,
-    borderColor: '#e5e5e5',
-    padding: 12,
+    borderColor: colors.border,
+    padding: spacing.md,
     alignItems: 'center',
+    ...shadow.suave,
   },
-  planCardActiva: { backgroundColor: '#e11d48', borderColor: '#e11d48' },
-  planNombre: { fontWeight: '700', fontSize: 12, color: '#1e272e', textAlign: 'center' },
-  planPrecio: { fontWeight: '800', fontSize: 15, color: '#1e272e', marginTop: 4 },
-  planPeriodo: { fontSize: 10, color: '#888' },
+  planCardActiva: { backgroundColor: colors.primary, borderColor: colors.primary },
+  planNombre: { fontFamily: fonts.semiBold, fontSize: 12, color: colors.textStrong, textAlign: 'center' },
+  planPrecio: { fontFamily: fonts.bold, fontSize: 15, color: colors.textStrong, marginTop: 4 },
+  planPeriodo: { fontFamily: fonts.regular, fontSize: 10, color: '#888' },
   planTextoActivo: { color: '#fff' },
   categoriasScroll: { flexGrow: 0 },
   chip: {
-    paddingHorizontal: 14,
+    paddingHorizontal: spacing.lg,
     paddingVertical: 7,
-    borderRadius: 20,
+    borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: '#dcdcdc',
-    backgroundColor: '#fff',
-    marginRight: 8,
+    backgroundColor: colors.surface,
+    marginRight: spacing.sm,
   },
-  chipActivo: { backgroundColor: '#e11d48', borderColor: '#e11d48' },
-  chipTexto: { fontSize: 13, fontWeight: '600', color: '#4a4a4a' },
+  chipActivo: { backgroundColor: colors.primary, borderColor: colors.primary },
+  chipTexto: { fontSize: 13, fontFamily: fonts.medium, color: '#4a4a4a' },
   chipTextoActivo: { color: '#fff' },
   input: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radius.sm + 4,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
-    padding: 12,
+    borderColor: colors.border,
+    padding: spacing.md,
     fontSize: 14,
-    marginBottom: 10,
+    fontFamily: fonts.regular,
+    color: colors.textStrong,
+    marginBottom: spacing.sm + 2,
   },
   inputMultilinea: { minHeight: 80, textAlignVertical: 'top' },
-  error: { color: '#e11d48', textAlign: 'center', marginTop: 8 },
+  error: { color: colors.danger, fontFamily: fonts.medium, textAlign: 'center', marginTop: spacing.sm },
   botonEnviar: {
-    backgroundColor: '#e11d48',
-    borderRadius: 30,
-    paddingVertical: 16,
+    backgroundColor: colors.primary,
+    borderRadius: radius.pill,
+    paddingVertical: spacing.lg,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: spacing.xl,
   },
   botonDeshabilitado: { backgroundColor: '#e5b1bd' },
-  botonEnviarTexto: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  resultadoEmoji: { fontSize: 48, marginBottom: 12 },
-  resultadoTitulo: { fontSize: 20, fontWeight: '800', color: '#1e272e', marginBottom: 8 },
-  resultadoTexto: { fontSize: 14, color: '#636e72', textAlign: 'center', lineHeight: 20 },
-  botonVolver: { marginTop: 24, paddingHorizontal: 20, paddingVertical: 12 },
-  botonVolverTexto: { color: '#e11d48', fontWeight: '700' },
+  botonEnviarTexto: { color: '#fff', fontFamily: fonts.bold, fontSize: 15 },
+  resultadoEmoji: { fontSize: 48, marginBottom: spacing.md },
+  resultadoTitulo: { fontSize: 20, fontFamily: fonts.bold, color: colors.textStrong, marginBottom: spacing.sm },
+  resultadoTexto: { fontSize: 14, fontFamily: fonts.regular, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  botonVolver: { marginTop: spacing.xxl - 4, paddingHorizontal: spacing.xl, paddingVertical: spacing.md },
+  botonVolverTexto: { color: colors.primary, fontFamily: fonts.bold },
 });

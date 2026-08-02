@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { fetchComercios, fetchCategorias, Comercio, Categoria } from '../lib/api';
+import { colors, fonts, spacing, radius, shadow } from '../constants/theme';
 
 type Props = {
   soloAgro: boolean;
@@ -99,11 +100,11 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
   const encabezado = (
     <>
       <View style={styles.buscadorCaja}>
-        <Ionicons name="search" size={18} color="#8f8f8f" />
+        <Ionicons name="search" size={18} color={colors.textFaint} />
         <TextInput
           style={styles.buscadorInput}
           placeholder="Buscar comercio..."
-          placeholderTextColor="#9aa0a6"
+          placeholderTextColor={colors.textFaint}
           value={busqueda}
           onChangeText={onBuscar}
         />
@@ -125,7 +126,7 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
             return (
               <Pressable
                 key={cat.slug}
-                style={styles.categoriaItem}
+                style={({ pressed }) => [styles.categoriaItem, pressed && styles.presionado]}
                 onPress={() => onSeleccionarCategoria(cat.slug)}
               >
                 <View
@@ -137,7 +138,7 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
                   <Text style={styles.categoriaEmoji}>{EMOJI_CATEGORIA[cat.slug] || '🏷️'}</Text>
                 </View>
                 <Text
-                  style={[styles.categoriaTexto, activa && { color: colorAcento, fontWeight: '700' }]}
+                  style={[styles.categoriaTexto, activa && { color: colorAcento, fontFamily: fonts.semiBold }]}
                   numberOfLines={1}
                 >
                   {cat.nombre}
@@ -185,7 +186,7 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
           const destacado = item.plan && item.plan !== 'gratuito';
           return (
             <Pressable
-              style={[styles.tarjeta, styles.tarjetaColumna]}
+              style={({ pressed }) => [styles.tarjeta, styles.tarjetaColumna, pressed && styles.presionado]}
               onPress={() => router.push(`/comercio/${item.id}`)}
             >
               <View style={styles.fotoContenedor}>
@@ -216,7 +217,7 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
                 ) : null}
                 {item.localidad_nombre ? (
                   <View style={styles.ubicacionFila}>
-                    <Ionicons name="location-outline" size={11} color="#9aa0a6" />
+                    <Ionicons name="location-outline" size={11} color={colors.textFaint} />
                     <Text style={styles.ubicacionTexto} numberOfLines={1}>
                       {item.localidad_nombre}
                     </Text>
@@ -232,55 +233,48 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
 }
 
 const styles = StyleSheet.create({
-  contenedor: { flex: 1, backgroundColor: '#f4f7f6' },
+  contenedor: { flex: 1, backgroundColor: colors.background },
+  presionado: { opacity: 0.75 },
   buscadorCaja: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    margin: 14,
-    marginBottom: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
+    gap: spacing.sm,
+    margin: spacing.lg,
+    marginBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 11,
+    backgroundColor: colors.surface,
+    borderRadius: radius.pill,
+    ...shadow.suave,
   },
-  buscadorInput: { flex: 1, fontSize: 15, color: '#1e272e', padding: 0 },
-  categorias: { paddingHorizontal: 10, paddingBottom: 14, gap: 4 },
+  buscadorInput: { flex: 1, fontSize: 15, fontFamily: fonts.regular, color: colors.textStrong, padding: 0 },
+  categorias: { paddingHorizontal: 10, paddingBottom: spacing.md + 2, gap: 4 },
   categoriaItem: { alignItems: 'center', width: 68, marginHorizontal: 4 },
   categoriaCirculo: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
   },
   categoriaEmoji: { fontSize: 22 },
-  categoriaTexto: { fontSize: 11, color: '#4a4a4a', textAlign: 'center' },
-  error: { color: '#e11d48', textAlign: 'center', marginBottom: 8 },
+  categoriaTexto: { fontSize: 11, fontFamily: fonts.medium, color: '#4a4a4a', textAlign: 'center' },
+  error: { color: colors.danger, fontFamily: fonts.medium, textAlign: 'center', marginBottom: spacing.sm },
   listaVacia: { flexGrow: 1 },
-  vacio: { textAlign: 'center', color: '#888', marginTop: 40, paddingHorizontal: 24 },
+  vacio: { fontFamily: fonts.regular, textAlign: 'center', color: colors.textFaint, marginTop: 40, paddingHorizontal: 24 },
   contenidoGrilla: { paddingHorizontal: 10, paddingBottom: 20 },
   filaGrilla: { gap: 10, paddingHorizontal: 4 },
   tarjeta: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
     overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    ...shadow.card,
   },
-  tarjetaColumna: { flex: 1, marginBottom: 12 },
+  tarjetaColumna: { flex: 1, marginBottom: spacing.md },
   fotoContenedor: { position: 'relative' },
   foto: { width: '100%', height: 110 },
   fotoVacia: { backgroundColor: '#f0f0f0', alignItems: 'center', justifyContent: 'center' },
@@ -293,13 +287,13 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-45deg' }],
     alignItems: 'center',
   },
-  cintaTexto: { color: '#fff', fontSize: 9, fontWeight: '800', letterSpacing: 0.3 },
+  cintaTexto: { color: '#fff', fontFamily: fonts.bold, fontSize: 9, letterSpacing: 0.3 },
   info: { padding: 10 },
-  nombre: { fontWeight: '700', fontSize: 13.5, color: '#1e272e', marginTop: 2, lineHeight: 17 },
-  categoria: { fontSize: 10.5, fontWeight: '700', textTransform: 'uppercase' },
-  descripcion: { fontSize: 12, color: '#636e72', marginTop: 4, lineHeight: 15 },
+  nombre: { fontFamily: fonts.semiBold, fontSize: 13.5, color: colors.textStrong, marginTop: 2, lineHeight: 17 },
+  categoria: { fontFamily: fonts.bold, fontSize: 10.5, textTransform: 'uppercase' },
+  descripcion: { fontFamily: fonts.regular, fontSize: 12, color: colors.textMuted, marginTop: 4, lineHeight: 15 },
   ubicacionFila: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 6 },
-  ubicacionTexto: { fontSize: 10.5, color: '#9aa0a6' },
-  esqueletoBloque: { backgroundColor: '#e8e8e8' },
-  esqueletoLinea: { height: 9, borderRadius: 5, backgroundColor: '#e8e8e8' },
+  ubicacionTexto: { fontFamily: fonts.regular, fontSize: 10.5, color: colors.textFaint },
+  esqueletoBloque: { backgroundColor: colors.skeleton },
+  esqueletoLinea: { height: 9, borderRadius: 5, backgroundColor: colors.skeleton },
 });

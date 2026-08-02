@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "comerciantes-app",
+    "name": "Comerciantes.com.ar",
     "slug": "comerciantes-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "backgroundColor": "#e11d48",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#e11d48",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
@@ -24,8 +24,17 @@
     },
     "plugins": [
       "expo-router",
-      "expo-splash-screen",
-      "expo-status-bar"
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#e11d48"
+        }
+      ],
+      "expo-status-bar",
+      "expo-font"
     ],
     "extra": {
       "router": {},

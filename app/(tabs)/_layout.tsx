@@ -1,6 +1,7 @@
 import { Tabs, useRouter } from 'expo-router';
 import { Pressable, View, Alert, type ColorValue } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors, fonts } from '../../constants/theme';
 
 function BotonAvatar() {
   return (
@@ -11,7 +12,7 @@ function BotonAvatar() {
       hitSlop={10}
       style={{ marginLeft: 16 }}
     >
-      <Ionicons name="person-circle" size={30} color="#9aa0a6" />
+      <Ionicons name="person-circle" size={30} color={colors.textFaint} />
     </Pressable>
   );
 }
@@ -27,7 +28,7 @@ function BotonNotificaciones() {
       }
       hitSlop={10}
     >
-      <Ionicons name="notifications-outline" size={24} color="#1e272e" />
+      <Ionicons name="notifications-outline" size={24} color={colors.textStrong} />
     </Pressable>
   );
 }
@@ -36,7 +37,7 @@ function BotonSumarComercio() {
   const router = useRouter();
   return (
     <Pressable onPress={() => router.push('/suscribirse')} hitSlop={10}>
-      <Ionicons name="add-circle" size={26} color="#e11d48" />
+      <Ionicons name="add-circle" size={26} color={colors.primary} />
     </Pressable>
   );
 }
@@ -54,10 +55,11 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#e11d48',
-        tabBarInactiveTintColor: '#9aa0a6',
-        headerStyle: { backgroundColor: '#fff' },
-        headerTitleStyle: { fontWeight: '700', color: '#1e272e' },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textFaint,
+        tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 11 },
+        headerStyle: { backgroundColor: colors.surface },
+        headerTitleStyle: { fontFamily: fonts.bold, fontSize: 19, color: colors.textStrong },
         headerLeft: () => <BotonAvatar />,
         headerRight: () => <AccionesHeader />,
       }}
