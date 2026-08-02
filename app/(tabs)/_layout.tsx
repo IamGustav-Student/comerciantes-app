@@ -1,15 +1,12 @@
 import { Tabs, useRouter } from 'expo-router';
-import { Text, Pressable, type ColorValue } from 'react-native';
-
-function TabIcon({ emoji, color }: { emoji: string; color: ColorValue }) {
-  return <Text style={{ fontSize: 20, color }}>{emoji}</Text>;
-}
+import { Pressable, type ColorValue } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 function BotonSumarComercio() {
   const router = useRouter();
   return (
     <Pressable onPress={() => router.push('/suscribirse')} hitSlop={10} style={{ marginRight: 16 }}>
-      <Text style={{ fontSize: 22 }}>➕</Text>
+      <Ionicons name="add-circle" size={26} color="#e11d48" />
     </Pressable>
   );
 }
@@ -30,7 +27,9 @@ export default function TabsLayout() {
         options={{
           title: 'Comerciantes',
           headerTitle: 'Comerciantes.com.ar',
-          tabBarIcon: ({ color }) => <TabIcon emoji="🏪" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'storefront' : 'storefront-outline'} size={22} color={color as ColorValue} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -38,7 +37,9 @@ export default function TabsLayout() {
         options={{
           title: 'Agro',
           headerTitle: 'AgroComercios',
-          tabBarIcon: ({ color }) => <TabIcon emoji="🌾" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'leaf' : 'leaf-outline'} size={22} color={color as ColorValue} />
+          ),
         }}
       />
     </Tabs>
