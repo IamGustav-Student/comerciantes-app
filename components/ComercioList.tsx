@@ -32,12 +32,12 @@ const EMOJI_CATEGORIA: Record<string, string> = {
 
 function TarjetaEsqueleto() {
   return (
-    <View style={styles.tarjeta}>
+    <View style={[styles.tarjeta, styles.tarjetaColumna]}>
       <View style={[styles.foto, styles.esqueletoBloque]} />
       <View style={styles.info}>
-        <View style={[styles.esqueletoLinea, { width: '70%' }]} />
-        <View style={[styles.esqueletoLinea, { width: '40%', marginTop: 8 }]} />
-        <View style={[styles.esqueletoLinea, { width: '90%', marginTop: 10 }]} />
+        <View style={[styles.esqueletoLinea, { width: '50%' }]} />
+        <View style={[styles.esqueletoLinea, { width: '85%', marginTop: 8 }]} />
+        <View style={[styles.esqueletoLinea, { width: '70%', marginTop: 8 }]} />
       </View>
     </View>
   );
@@ -156,9 +156,14 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
     return (
       <View style={styles.contenedor}>
         {encabezado}
-        {[1, 2, 3, 4].map((i) => (
-          <TarjetaEsqueleto key={i} />
-        ))}
+        <View style={styles.filaGrilla}>
+          <TarjetaEsqueleto />
+          <TarjetaEsqueleto />
+        </View>
+        <View style={styles.filaGrilla}>
+          <TarjetaEsqueleto />
+          <TarjetaEsqueleto />
+        </View>
       </View>
     );
   }
@@ -168,8 +173,10 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
       <FlatList
         data={comercios}
         keyExtractor={(item) => String(item.id)}
+        numColumns={2}
+        columnWrapperStyle={styles.filaGrilla}
         ListHeaderComponent={encabezado}
-        contentContainerStyle={comercios.length === 0 ? styles.listaVacia : undefined}
+        contentContainerStyle={comercios.length === 0 ? styles.listaVacia : styles.contenidoGrilla}
         refreshControl={
           <RefreshControl refreshing={refrescando} onRefresh={onRefresh} colors={[colorAcento]} />
         }
@@ -177,7 +184,10 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
         renderItem={({ item }) => {
           const destacado = item.plan && item.plan !== 'gratuito';
           return (
-            <Pressable style={styles.tarjeta} onPress={() => router.push(`/comercio/${item.id}`)}>
+            <Pressable
+              style={[styles.tarjeta, styles.tarjetaColumna]}
+              onPress={() => router.push(`/comercio/${item.id}`)}
+            >
               <View style={styles.fotoContenedor}>
                 {item.foto_portada ? (
                   <Image source={{ uri: item.foto_portada }} style={styles.foto} />
@@ -193,11 +203,11 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
                 ) : null}
               </View>
               <View style={styles.info}>
-                <Text style={styles.nombre} numberOfLines={1}>
-                  {item.nombre_negocio}
-                </Text>
-                <Text style={[styles.categoria, { color: colorAcento }]}>
+                <Text style={[styles.categoria, { color: colorAcento }]} numberOfLines={1}>
                   {item.categoria_nombre || 'Sin categoría'}
+                </Text>
+                <Text style={styles.nombre} numberOfLines={2}>
+                  {item.nombre_negocio}
                 </Text>
                 {item.descripcion ? (
                   <Text style={styles.descripcion} numberOfLines={2}>
@@ -206,8 +216,10 @@ export default function ComercioList({ soloAgro, colorAcento, textoVacio }: Prop
                 ) : null}
                 {item.localidad_nombre ? (
                   <View style={styles.ubicacionFila}>
-                    <Ionicons name="location-outline" size={12} color="#9aa0a6" />
-                    <Text style={styles.ubicacionTexto}>{item.localidad_nombre}</Text>
+                    <Ionicons name="location-outline" size={11} color="#9aa0a6" />
+                    <Text style={styles.ubicacionTexto} numberOfLines={1}>
+                      {item.localidad_nombre}
+                    </Text>
                   </View>
                 ) : null}
               </View>
@@ -256,11 +268,10 @@ const styles = StyleSheet.create({
   error: { color: '#e11d48', textAlign: 'center', marginBottom: 8 },
   listaVacia: { flexGrow: 1 },
   vacio: { textAlign: 'center', color: '#888', marginTop: 40, paddingHorizontal: 24 },
+  contenidoGrilla: { paddingHorizontal: 10, paddingBottom: 20 },
+  filaGrilla: { gap: 10, paddingHorizontal: 4 },
   tarjeta: {
-    flexDirection: 'row',
     backgroundColor: '#fff',
-    marginHorizontal: 14,
-    marginBottom: 12,
     borderRadius: 14,
     overflow: 'hidden',
     elevation: 2,
@@ -269,8 +280,9 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
   },
+  tarjetaColumna: { flex: 1, marginBottom: 12 },
   fotoContenedor: { position: 'relative' },
-  foto: { width: 100, height: 100 },
+  foto: { width: '100%', height: 110 },
   fotoVacia: { backgroundColor: '#f0f0f0', alignItems: 'center', justifyContent: 'center' },
   cintaDestacado: {
     position: 'absolute',
@@ -282,12 +294,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cintaTexto: { color: '#fff', fontSize: 9, fontWeight: '800', letterSpacing: 0.3 },
-  info: { flex: 1, padding: 12, justifyContent: 'center' },
-  nombre: { fontWeight: '700', fontSize: 15, color: '#1e272e' },
-  categoria: { fontSize: 12, marginTop: 2, fontWeight: '600' },
-  descripcion: { fontSize: 13, color: '#636e72', marginTop: 4 },
-  ubicacionFila: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 5 },
-  ubicacionTexto: { fontSize: 11, color: '#9aa0a6' },
+  info: { padding: 10 },
+  nombre: { fontWeight: '700', fontSize: 13.5, color: '#1e272e', marginTop: 2, lineHeight: 17 },
+  categoria: { fontSize: 10.5, fontWeight: '700', textTransform: 'uppercase' },
+  descripcion: { fontSize: 12, color: '#636e72', marginTop: 4, lineHeight: 15 },
+  ubicacionFila: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 6 },
+  ubicacionTexto: { fontSize: 10.5, color: '#9aa0a6' },
   esqueletoBloque: { backgroundColor: '#e8e8e8' },
-  esqueletoLinea: { height: 10, borderRadius: 5, backgroundColor: '#e8e8e8' },
+  esqueletoLinea: { height: 9, borderRadius: 5, backgroundColor: '#e8e8e8' },
 });
